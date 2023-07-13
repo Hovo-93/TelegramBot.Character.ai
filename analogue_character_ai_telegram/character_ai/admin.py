@@ -1,7 +1,7 @@
 from django.contrib import admin
-from .models import User, Character
+from character_ai.models import TelegramUser, Character
 
 # Register your models here.
-admin.site.register(User)
+admin.site.register(TelegramUser)
 
 admin.site.register(Character)
