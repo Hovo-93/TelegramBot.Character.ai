@@ -1,17 +1,89 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-</head>
-<body>
-   <div id="main">
-       <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s</p>
-       <a class="link" href="https://mihailgok.ru">Link</a>
-       <button id ="choose">Выбрать</button>
-   </div>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
 
+
+    .flex-container > div {
+      background-color: #f1f1f1;
+      margin: 10px;
+      padding: 20px;
+      font-size: 30px;
+      flex-direction: row;
+      display: flex;
+
+    }
+    </style>
+
+</head>
+
+<body style="display: flex;flex-wrap: wrap;">
+
+    {% for character in characters %}
+
+    <div class="flex-container">
+        <div >
+            <img src="static/{{character.image}}" width="100%" height="100%" alt="photos"/>
+        </div>
+              <button  class="character" style="width:100%" data-user-id ="{{ user_id }}" data-id="{{ character.id }}">{{character.personage_name}}</button>
+    </div>
+ {% endfor %}
+
+    <form method="post" action="choose-character">
+        {% csrf_token %}
+    </form>
+<script>
+	const buttons = document.getElementsByClassName("character");
+	const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+	console.log(csrfToken);
+
+    function getParameterByName(name, url = window.location.href) {
+    name = name.replace(/[\[\]]/g, '\\$&');
+    var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+
+
+	for (button of buttons) {
+		button.addEventListener('click', function handleClick(event) {
+			const personageId = (this.getAttribute("data-id"))
+			const urlParams = new URLSearchParams(window.location.search);
+            const myParam = urlParams.get('tgId');
+            //const myParam = getParameterByName('tgId');
+			const body = JSON.stringify({
+				"id": personageId,
+				"telegram_id":myParam,
+				// "test": window.Telegram.WebApp.WebAppUser()
+			})
+
+			console.log(csrfToken);
+			fetch('/my_endpoint', {
+				method: 'POST',
+				mode: 'same-origin',
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json',
+					'X-CSRFToken': csrfToken,
+				},
+				body
+			})
+				.then(response =>  window.Telegram.WebApp.close())
+				.then(response => console.log(JSON.stringify(response)));
+
+			console.log('button clicked', event);
+		});
+	}
+
+
+</script>
+    <div class="usercard" id="usercard"></div>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </body>
 </html>
